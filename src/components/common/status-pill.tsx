@@ -23,7 +23,7 @@ export const STATUS_LABEL: Record<ProductStatus, string> = {
 export const STATUS_TONE: Record<ProductStatus, PillTone> = {
   "running-low": "critical",
   "low-stock": "warning",
-  "no-sales": "critical",
+  "no-sales": "warning",
   slow: "warning",
   overstocked: "info",
   ok: "success",

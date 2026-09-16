@@ -10,7 +10,7 @@ interface PageTitleProps {
 
 export function PageTitle({ title, subtitle, action, className }: PageTitleProps) {
   return (
-    <div className={cn("mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between lg:mb-8", className)}>
+    <div className={cn("flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between", className)}>
       <div>
         <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">{title}</h1>
         {subtitle && <p className="mt-1.5 text-base text-muted-foreground">{subtitle}</p>}

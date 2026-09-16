@@ -3,6 +3,7 @@ import { formatMoney, formatPercent, formatPrice } from "./format";
 import {
   allProductStats,
   costIncreases,
+  historyDays,
   lowStock,
   noSales,
   profitDrops,
@@ -83,9 +84,9 @@ function slowAlert(s: ProductStats): Alert {
   return make("slow", "stock", "orange", s, "Slow Product", `${formatMoney(s.stockValue)} is sitting in this product with almost no sales. ${s.units60} sold in the last 60 days.`, s.stockValue);
 }
 
-function noSalesAlert(s: ProductStats): Alert {
-  const since = s.lastSaleDaysAgo === null ? "No sales in the last 120 days" : `No sales for ${daysWord(s.lastSaleDaysAgo)}`;
-  return make("no-sales", "stock", s.stockValue >= 1000 ? "red" : "orange", s, "No Sales", `${since}. ${formatMoney(s.stockValue)} is sitting in stock.`, s.stockValue);
+function noSalesAlert(s: ProductStats, history: number): Alert {
+  const since = s.lastSaleDaysAgo === null ? `No sales in the last ${history} days` : `No sales for ${daysWord(s.lastSaleDaysAgo)}`;
+  return make("no-sales", "stock", "orange", s, "No Sales", `${since}. ${formatMoney(s.stockValue)} is sitting in stock.`, s.stockValue);
 }
 
 function sellingLessAlert(s: ProductStats): Alert {
@@ -117,11 +118,12 @@ export function buildAlerts(data: Dataset): Alert[] {
   const cached = alertsCache.get(data);
   if (cached) return cached;
 
+  const history = historyDays(data);
   const alerts: Alert[] = [
     ...runningLow(data).map(runningLowAlert),
     ...lowStock(data).map(lowStockAlert),
     ...slowProducts(data).map(slowAlert),
-    ...noSales(data).map(noSalesAlert),
+    ...noSales(data).map((s) => noSalesAlert(s, history)),
     ...sellingLess(data).map(sellingLessAlert),
     ...costIncreases(data).map(costIncreaseAlert),
     ...profitDrops(data).map(profitDropAlert),

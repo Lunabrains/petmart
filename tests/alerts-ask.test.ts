@@ -63,6 +63,19 @@ describe("alert statuses", () => {
     assert.equal(statusOf(withStatus(back, "a", "new"), "a"), "new");
     assert.deepEqual(pruneStatuses(back, new Set(["a"])), { seen: [], done: ["a"] });
     assert.deepEqual(parseAlertStatuses("not json"), { seen: [], done: [] });
+    assert.deepEqual(parseAlertStatuses("{}"), { seen: [], done: [] });
+    assert.deepEqual(parseAlertStatuses('{"seen":["x"],"done":["y"]}'), { seen: ["x"], done: ["y"] });
+  });
+
+  it("keep the cookie small even when every alert is marked", () => {
+    const ids = buildAlerts(data).map((a) => a.id);
+    let map = parseAlertStatuses(undefined);
+    ids.forEach((id, i) => (map = withStatus(map, id, i % 3 === 0 ? "done" : "seen")));
+    const raw = serializeAlertStatuses(map);
+    assert.ok(raw.length < ids.length * 9, `${raw.length} chars for ${ids.length} alerts`);
+    assert.equal(encodeURIComponent(raw), raw, "nothing in the cookie needs escaping");
+    const back = parseAlertStatuses(raw);
+    ids.forEach((id, i) => assert.equal(statusOf(back, id), i % 3 === 0 ? "done" : "seen"));
   });
 });
 

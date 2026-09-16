@@ -239,6 +239,11 @@ function sum(values: number[], from: number, to: number): number {
 // Totals over time
 // ---------------------------------------------------------------------------
 
+/** How many days of sales history the data covers (at least 120). */
+export function historyDays(data: Dataset): number {
+  return buildIndex(data).horizon;
+}
+
 /** Totals for the `days` days ending `offset` days ago (offset 0 = ending today). */
 export function periodTotals(data: Dataset, days: number, offset = 0): PeriodTotals {
   const { days: all } = buildIndex(data);
