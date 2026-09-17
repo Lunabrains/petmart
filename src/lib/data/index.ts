@@ -21,40 +21,48 @@ export function todayISO(): string {
   return format(new Date(), "yyyy-MM-dd");
 }
 
-let base: { today: string; data: Dataset } | null = null;
-const batches: ImportBatch[] = [];
-let merged: { key: string; data: Dataset } | null = null;
+interface Store {
+  base: { today: string; data: Dataset } | null;
+  batches: ImportBatch[];
+  merged: { key: string; data: Dataset } | null;
+}
+
+// One store per server process. It hangs off globalThis because in development
+// each route gets its own copy of this module; the API route that adds an
+// import and the page that shows it must see the same imports.
+const globalStore = globalThis as typeof globalThis & { __petmartStore?: Store };
+const store: Store = (globalStore.__petmartStore ??= { base: null, batches: [], merged: null });
 
 /** The generated demo data for today, without imports. */
 export function getBaseData(): Dataset {
   const today = todayISO();
-  if (!base || base.today !== today) {
-    base = { today, data: generateDemo(today) };
-    merged = null;
+  if (!store.base || store.base.today !== today) {
+    store.base = { today, data: generateDemo(today) };
+    store.merged = null;
   }
-  return base.data;
+  return store.base.data;
 }
 
 /** The dataset "as of" today: demo data plus every confirmed import. */
 export function getData(): Dataset {
   const baseData = getBaseData();
-  const key = `${baseData.today}:${batches.map((b) => b.id).join(",")}`;
-  if (!merged || merged.key !== key) merged = { key, data: applyImports(baseData, batches) };
-  return merged.data;
+  const key = `${baseData.today}:${store.batches.map((b) => b.id).join(",")}`;
+  if (!store.merged || store.merged.key !== key) store.merged = { key, data: applyImports(baseData, store.batches) };
+  return store.merged.data;
 }
 
 export function addImportBatch(batch: ImportBatch): void {
-  batches.push(batch);
-  merged = null;
+  store.batches.push(batch);
+  store.merged = null;
 }
 
 export function resetImports(): void {
-  batches.length = 0;
-  merged = null;
+  store.batches.length = 0;
+  store.merged = null;
 }
 
 export function listImportBatches(): ImportBatchSummary[] {
-  return batches
+  return store.batches
     .map((b) => ({ id: b.id, at: b.at, fileName: b.fileName, documentType: b.documentType, products: b.products.length, sales: b.sales.length, purchases: b.purchases.length }))
     .reverse();
 }
