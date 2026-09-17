@@ -41,6 +41,7 @@ npm run lint
 | **Products** | Search by name, code, barcode or brand. Product page with price, cost, profit per unit, stock, days of stock, supplier, sales history, cost history and alerts. |
 | **Alerts** | Stock, sales and profit problems with New / Seen / Done. |
 | **Ask** | "Ask About Your Business": plain questions answered only from the company's numbers. |
+| **Import** | Upload an Excel/CSV export from Wizzard or a PDF from a supplier (delivery note, invoice, sales report, price list). The page shows what it recognised, the owner confirms, and the products, deliveries and sales are added to the dashboard. |
 
 ## How the numbers are calculated
 
@@ -72,6 +73,24 @@ six cases from the brief are guaranteed and tested (`tests/demo.test.ts`):
 4. profit dropped because the cost went up and the price did not (Purina Medium Adult 10kg, $48 → $54 at $65),
 5. strong-selling products,
 6. a product with no sales for over 90 days (Ferplast Bird Cage XL).
+
+## Import
+
+`src/lib/imports/` reads files without any outside service:
+
+- **Excel / CSV** (`excel.ts`): every sheet is read under its header row. Columns are matched
+  loosely ("Qty", "Quantity", "Units"; "Unit Cost", "Purchase Price"...), and a sheet is treated as
+  products, sales or deliveries from its name or its columns.
+- **PDF** (`pdf.ts`): the text is extracted and every line that names a product we know (by code,
+  barcode or exact name) is read for its quantity and unit amount. Wording decides the document type:
+  delivery note / invoice → deliveries, sales report → sales, price list → new costs.
+- **Apply** (`apply.ts`): a delivery adds stock and becomes the latest cost (so cost-increase and
+  profit-drop alerts appear), a sale removes stock, a product row creates or updates a product.
+  Imports live in memory for the demo session and can be removed from the Import page.
+
+Two sample files are generated from today's data at `/api/import/sample?type=excel` and
+`?type=pdf`, so the demo story always lines up: the running-low top seller gets restocked and two
+products arrive at a higher cost.
 
 ## Connecting Wizzard later (phase 7)
 

@@ -71,7 +71,7 @@ export function MobileNav({ alertCount }: SidebarProps) {
         <Brand />
       </header>
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-sidebar-border bg-sidebar/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-7 border-t border-sidebar-border bg-sidebar/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
         aria-label="Main"
       >
         {NAV.map(({ href, label, icon: Icon }) => {

@@ -1,5 +1,5 @@
 import type { Dataset } from "./data/types";
-import { formatDaysAgo, formatDaysLeft, formatMoney, formatPercent, formatPrice, formatSignedPercent, pluralize } from "./format";
+import { formatDaysAgo, formatDaysLeft, formatMoney, formatNumber, formatPercent, formatPrice, formatSignedPercent, pluralize } from "./format";
 import { allProductStats, getOverview, type ProductStats } from "./metrics";
 
 /**
@@ -28,15 +28,15 @@ export const SUGGESTED_QUESTIONS = [
 
 type Intent = "attention" | "bestSellers" | "order" | "notSelling" | "profit" | "salesSummary" | "stockValue";
 
-/** Phrases score 2, single words score 1; the highest total wins. */
+/** Phrases score 2, single words score 1; the highest total wins (earlier entries win ties). */
 const INTENT_KEYWORDS: Record<Intent, string[]> = {
   attention: ["look at", "attention", "focus", "priorit", "what needs", "start with", "today", "worry", "problems", "issues"],
   bestSellers: ["best", "top", "most", "selling the most", "popular", "winners", "fastest"],
   order: ["order", "running low", "running out", "run out", "low stock", "restock", "reorder", "out of stock", "buy", "running short"],
   notSelling: ["not selling", "slow", "no sales", "dead", "sitting", "stuck", "not moving", "selling less", "isn't selling", "aren't selling", "not sold", "worst", "dropped"],
   profit: ["profit", "losing", "margin", "cost increase", "supplier cost", "cost went up", "losing money", "cost increased", "expensive"],
+  stockValue: ["stock value", "inventory value", "how much stock", "my stock", "stock worth", "stock is worth", "inventory", "worth", "tied up"],
   salesSummary: ["sales", "revenue", "sold", "happened", "this month", "this week", "how much", "turnover", "selling"],
-  stockValue: ["stock value", "inventory value", "how much stock", "worth", "stock is worth"],
 };
 
 export function detectIntent(question: string): Intent | null {
@@ -80,7 +80,7 @@ export function askQuestion(question: string, data: Dataset): Answer {
     case "bestSellers":
       return {
         title: "Your Best Sellers",
-        lines: o.bestSellers.map((s, i) => `${i + 1}. ${s.product.name}: ${pluralize(s.units30, "sold")}, ${formatMoney(s.revenue30)} in sales, ${formatMoney(s.profit30)} profit.`),
+        lines: o.bestSellers.map((s, i) => `${i + 1}. ${s.product.name}: ${formatNumber(s.units30)} sold, ${formatMoney(s.revenue30)} in sales, ${formatMoney(s.profit30)} profit.`),
         note: "Last 30 days.",
         link: { label: "See Sales", href: "/sales" },
       };
@@ -173,7 +173,7 @@ function productAnswer(s: ProductStats): Answer {
   const p = s.product;
   const lines = [
     `Selling price ${formatPrice(p.price)}, cost ${formatPrice(p.cost)}, profit ${formatPrice(s.profitPerUnit)} per unit (${formatPercent(s.margin)}).`,
-    `${pluralize(s.units30, "sold")} in the last 30 days, ${formatMoney(s.revenue30)} in sales.`,
+    `${formatNumber(s.units30)} sold in the last 30 days, ${formatMoney(s.revenue30)} in sales.`,
     `${pluralize(p.stock, "unit")} in stock (${formatMoney(s.stockValue)}). ${formatDaysLeft(s.daysLeft)} of stock left. Last sale: ${formatDaysAgo(s.lastSaleDaysAgo).toLowerCase()}.`,
   ];
   if (s.costChange?.profitDropped) {

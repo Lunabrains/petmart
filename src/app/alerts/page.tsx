@@ -7,7 +7,7 @@ import { PageTitle } from "@/components/common/page-title";
 import { Section } from "@/components/common/section";
 import { ALERT_STATUS_COOKIE, parseAlertStatuses, statusOf } from "@/lib/alert-status";
 import { buildAlerts } from "@/lib/alerts";
-import { pluralize } from "@/lib/format";
+import { formatNumber, pluralize } from "@/lib/format";
 import { loadData } from "@/lib/server-data";
 
 export const metadata: Metadata = { title: "Alerts" };
@@ -26,6 +26,13 @@ function readStatus(value: string | undefined): StatusFilter {
   return value === "done" ? "done" : "open";
 }
 
+/** "20 need action now, 109 worth a look this week": the red count is the same number shown next to "Alerts" in the menu. */
+function openSummary(red: number, orange: number): string {
+  if (red + orange === 0) return "No open alerts";
+  const action = red > 0 ? pluralize(red, "needs action now", "need action now") : "Nothing needs action now";
+  return orange > 0 ? `${action}, ${formatNumber(orange)} worth a look this week` : action;
+}
+
 export default async function AlertsPage({ searchParams }: { searchParams: SearchParams }) {
   const [params, data, cookieStore] = await Promise.all([searchParams, loadData(), cookies()]);
   const category = readCategory(first(params.category));
@@ -36,6 +43,7 @@ export default async function AlertsPage({ searchParams }: { searchParams: Searc
 
   const open = items.filter((i) => i.status !== "done");
   const done = items.filter((i) => i.status === "done");
+  const openRed = open.filter((i) => i.alert.level === "red").length;
   const openCounts = Object.fromEntries(
     CATEGORY_FILTERS.map((c) => [c, c === "all" ? open.length : open.filter((i) => i.alert.category === c).length]),
   ) as Record<CategoryFilter, number>;
@@ -49,7 +57,7 @@ export default async function AlertsPage({ searchParams }: { searchParams: Searc
 
   return (
     <div className="flex flex-col gap-8 lg:gap-10">
-      <PageTitle title="Alerts" subtitle={pluralize(open.length, "open alert")} />
+      <PageTitle title="Alerts" subtitle={openSummary(openRed, open.length - openRed)} />
 
       <div className="flex flex-col gap-4">
         <AlertFilters category={category} status={status} openCounts={openCounts} doneCount={done.length} />

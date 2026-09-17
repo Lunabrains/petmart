@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { parseAlertStatuses, pruneStatuses, serializeAlertStatuses, statusOf, withStatus } from "../src/lib/alert-status";
+import { countOpenRedAlerts, parseAlertStatuses, pruneStatuses, serializeAlertStatuses, statusOf, withStatus } from "../src/lib/alert-status";
 import { alertsForProduct, buildAlerts } from "../src/lib/alerts";
 import { askQuestion, detectIntent, SUGGESTED_QUESTIONS } from "../src/lib/ask";
 import { DEMO_CASES, generateDemo } from "../src/lib/data/demo";
@@ -76,6 +76,22 @@ describe("alert statuses", () => {
     assert.equal(encodeURIComponent(raw), raw, "nothing in the cookie needs escaping");
     const back = parseAlertStatuses(raw);
     ids.forEach((id, i) => assert.equal(statusOf(back, id), i % 3 === 0 ? "done" : "seen"));
+  });
+
+  it("drop a red alert from the menu badge once it is marked done", () => {
+    const alerts = buildAlerts(data);
+    const red = alerts.filter((a) => a.level === "red");
+    const orange = alerts.find((a) => a.level === "orange")!;
+    let map = parseAlertStatuses(undefined);
+    assert.equal(countOpenRedAlerts(alerts, map), red.length);
+    map = withStatus(map, red[0].id, "seen");
+    map = withStatus(map, orange.id, "done");
+    assert.equal(countOpenRedAlerts(alerts, map), red.length, "seen and orange do not change the badge");
+    map = withStatus(map, red[0].id, "done");
+    assert.equal(countOpenRedAlerts(alerts, map), red.length - 1);
+    assert.equal(countOpenRedAlerts(alerts, parseAlertStatuses(serializeAlertStatuses(map))), red.length - 1);
+    red.forEach((a) => (map = withStatus(map, a.id, "done")));
+    assert.equal(countOpenRedAlerts(alerts, map), 0);
   });
 });
 

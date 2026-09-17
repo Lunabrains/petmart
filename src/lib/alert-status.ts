@@ -1,4 +1,4 @@
-import type { AlertRule, AlertStatus } from "./alerts";
+import type { Alert, AlertRule, AlertStatus } from "./alerts";
 
 /**
  * Alert statuses (New / Seen / Done) are the only thing the dashboard
@@ -99,6 +99,11 @@ export function withStatus(map: AlertStatusMap, alertId: string, status: AlertSt
   if (status === "seen") seen.push(alertId);
   if (status === "done") done.push(alertId);
   return { seen, done };
+}
+
+/** Red alerts the owner has not marked done: the number shown next to "Alerts" in the menu. */
+export function countOpenRedAlerts(alerts: readonly Alert[], map: AlertStatusMap): number {
+  return alerts.filter((a) => a.level === "red" && statusOf(map, a.id) !== "done").length;
 }
 
 /** Forget ids that no longer match any open alert, so the cookie never grows without bound. */

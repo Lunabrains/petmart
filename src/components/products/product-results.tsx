@@ -1,5 +1,5 @@
 import { ProductLink } from "@/components/common/product-link";
-import { StatusPill } from "@/components/common/status-pill";
+import { ProductStatusPills } from "@/components/products/product-status";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatNumber, formatPercent, formatPrice } from "@/lib/format";
 import type { ProductStats } from "@/lib/metrics";
@@ -23,13 +23,15 @@ export function ProductResults({ products }: { products: ProductStats[] }) {
       <TableBody>
         {products.map((s) => (
           <TableRow key={s.product.id}>
-            <TableCell className="max-w-[16rem] pl-5 lg:pl-6">
+            <TableCell className="max-w-[11rem] sm:max-w-[16rem] pl-5 lg:pl-6">
               <ProductLink product={s.product} detail />
             </TableCell>
             <TableCell className="tabular text-right">{formatPrice(s.product.price)}</TableCell>
             <TableCell className="tabular text-right">{formatPrice(s.product.cost)}</TableCell>
             <TableCell className="tabular text-right">
-              <span className={cn("font-medium", s.profitPerUnit > 0 ? "text-success" : "text-critical")}>{formatPrice(s.profitPerUnit)}</span>
+              <span className={cn("font-medium", s.profitPerUnit > 0 && !s.costChange?.profitDropped ? "text-success" : "text-critical")}>
+                {formatPrice(s.profitPerUnit)}
+              </span>
               <span className="ml-1.5 text-xs text-muted-foreground">{formatPercent(s.margin)}</span>
             </TableCell>
             <TableCell className="tabular text-right">
@@ -37,7 +39,7 @@ export function ProductResults({ products }: { products: ProductStats[] }) {
             </TableCell>
             <TableCell className="tabular text-right">{formatNumber(s.units30)}</TableCell>
             <TableCell className="pr-5 lg:pr-6">
-              <StatusPill status={s.status} />
+              <ProductStatusPills stats={s} />
             </TableCell>
           </TableRow>
         ))}

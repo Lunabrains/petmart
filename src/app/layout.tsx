@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 
 import { MobileNav, Sidebar } from "@/components/shell/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ALERT_STATUS_COOKIE, countOpenRedAlerts, parseAlertStatuses } from "@/lib/alert-status";
 import { buildAlerts } from "@/lib/alerts";
 import { loadData } from "@/lib/server-data";
 
@@ -17,8 +19,10 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const data = await loadData();
-  const redAlerts = buildAlerts(data).filter((a) => a.level === "red").length;
+  // Same cookie the Alerts page reads, so the badge drops when a red alert is marked Done.
+  const [data, cookieStore] = await Promise.all([loadData(), cookies()]);
+  const statuses = parseAlertStatuses(cookieStore.get(ALERT_STATUS_COOKIE)?.value);
+  const redAlerts = countOpenRedAlerts(buildAlerts(data), statuses);
 
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>

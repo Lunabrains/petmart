@@ -1,4 +1,4 @@
-import { Bell, House, MessageCircleQuestion, Package, Tag, TrendingUp, type LucideIcon } from "lucide-react";
+import { Bell, House, MessageCircleQuestion, Package, Tag, TrendingUp, Upload, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
   href: string;
@@ -14,6 +14,7 @@ export const NAV: NavItem[] = [
   { href: "/products", label: "Products", icon: Tag },
   { href: "/alerts", label: "Alerts", icon: Bell },
   { href: "/ask", label: "Ask", icon: MessageCircleQuestion },
+  { href: "/import", label: "Import", icon: Upload },
 ];
 
 export function isActive(pathname: string, href: string): boolean {

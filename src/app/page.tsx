@@ -131,7 +131,7 @@ export default async function HomePage() {
             <TableBody>
               {o.bestSellers.map((s) => (
                 <TableRow key={s.product.id}>
-                  <TableCell className="max-w-[16rem] pl-5 lg:pl-6">
+                  <TableCell className="max-w-[11rem] sm:max-w-[16rem] pl-5 lg:pl-6">
                     <ProductLink product={s.product} detail />
                   </TableCell>
                   <TableCell className="tabular text-right">{formatNumber(s.units30)}</TableCell>
@@ -148,7 +148,7 @@ export default async function HomePage() {
 
         <Section
           title="Sales"
-          description="Last 30 days"
+          description="Last 30 days, with profit as the dotted line."
           action={
             <Link href="/sales" className="text-sm font-medium text-brand hover:underline">
               See sales

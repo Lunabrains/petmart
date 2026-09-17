@@ -6,10 +6,9 @@ import { ArrowLeft } from "lucide-react";
 import { ProductCostChart, ProductSalesChart } from "@/components/charts/product-charts";
 import { PageTitle } from "@/components/common/page-title";
 import { Section } from "@/components/common/section";
-import { StatusPill } from "@/components/common/status-pill";
-import { DeliveriesTable } from "@/components/products/deliveries-table";
 import { ProductAlerts } from "@/components/products/product-alerts";
 import { ProductFacts } from "@/components/products/product-facts";
+import { ProductStatusPills } from "@/components/products/product-status";
 import { alertsForProduct } from "@/lib/alerts";
 import { getProductStats, productCostHistory, productSalesHistory } from "@/lib/metrics";
 import { loadData } from "@/lib/server-data";
@@ -46,7 +45,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           title={
             <span className="flex flex-wrap items-center gap-x-3 gap-y-2">
               {product.name}
-              <StatusPill status={stats.status} className="h-7 px-3 text-sm" />
+              <ProductStatusPills stats={stats} className="h-7 px-3 text-sm" />
             </span>
           }
           subtitle={`${product.brand} · ${product.category} · Code ${product.code} · Barcode ${product.barcode}`}
@@ -59,18 +58,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <ProductSalesChart days={history} />
       </Section>
 
-      <Section title="Cost History" description="What each delivery cost, against the selling price." flush>
+      <Section title="Cost History" description="What each delivery cost, against the selling price.">
         {deliveries.length > 0 ? (
           <>
-            <div className="px-5 lg:px-6">
-              <ProductCostChart purchases={deliveries} price={product.price} />
-            </div>
-            <div className="mt-4 border-t pt-2">
-              <DeliveriesTable purchases={deliveries} />
-            </div>
+            <ProductCostChart purchases={deliveries} price={product.price} />
+            {deliveries.length === 1 && <p className="mt-3 text-sm text-muted-foreground">Only one delivery on record.</p>}
           </>
         ) : (
-          <p className="px-5 pb-4 text-sm text-muted-foreground lg:px-6">No deliveries on record.</p>
+          <p className="text-sm text-muted-foreground">No deliveries on record.</p>
         )}
       </Section>
 

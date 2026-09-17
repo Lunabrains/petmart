@@ -23,8 +23,7 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
   const data = await loadData();
 
   const low = runningLow(data);
-  const ordering = needsOrdering(data);
-  const lowSoon = ordering.length - low.length;
+  const lowSoon = needsOrdering(data).filter((s) => s.status === "low-stock");
   const tooMuch = overstocked(data);
   const slow = slowProducts(data);
   const dead = noSales(data, since);
@@ -40,18 +39,27 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
         id="running-low"
         title={`Running Low · ${pluralize(low.length, "product")}`}
         description={
-          ordering.length
-            ? `${low.length ? `${pluralize(low.length, "product")} may run out within a week` : "Nothing runs out this week"}${
-                lowSoon ? `, ${pluralize(lowSoon, "more product")} within two weeks` : ""
-              }. Soonest to run out first, at the current pace of sales.`
-            : "No product will run out within two weeks at the current pace of sales."
+          low.length
+            ? "May run out within a week at the current pace of sales. Soonest to run out first."
+            : "No product will run out within a week at the current pace of sales."
         }
-        flush={ordering.length > 0}
+        flush={low.length > 0 || lowSoon.length > 0}
       >
-        {ordering.length ? (
-          <RunningLowTable rows={ordering} />
+        {low.length ? (
+          <RunningLowTable rows={low} />
         ) : (
-          <EmptyState title="Nothing is running low" description="No product needs ordering right now." />
+          <div className="px-5 pb-3 lg:px-6">
+            <EmptyState title="Nothing is running low" description="No product needs ordering right now." />
+          </div>
+        )}
+        {lowSoon.length > 0 && (
+          <div className="mt-2 border-t">
+            <div className="px-5 pt-4 pb-1 lg:px-6">
+              <h3 className="text-base font-semibold">Low Stock · {pluralize(lowSoon.length, "product")}</h3>
+              <p className="text-sm text-muted-foreground">Fewer than two weeks of stock left. Worth ordering soon.</p>
+            </div>
+            <RunningLowTable rows={lowSoon} />
+          </div>
         )}
       </Section>
 

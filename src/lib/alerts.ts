@@ -70,7 +70,8 @@ function make(rule: AlertRule, category: AlertCategory, level: AlertLevel, s: Pr
 }
 
 function runningLowAlert(s: ProductStats): Alert {
-  const days = Math.max(0, Math.floor(s.daysLeft ?? 0));
+  // Rounded like every other screen, so the same product never shows two different day counts.
+  const days = Math.max(0, Math.round(s.daysLeft ?? 0));
   const when = days === 0 ? "may run out today" : `may run out in ${daysWord(days)}`;
   return make("running-low", "stock", "red", s, "Running Low", `${s.product.name} ${when}. ${s.product.stock} left, selling about ${perDay(s.avgDaily)}.`, s.revenue30);
 }

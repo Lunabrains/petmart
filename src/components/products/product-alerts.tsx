@@ -13,8 +13,10 @@ interface ProductAlertsProps {
 export function ProductAlerts({ alerts, costChange }: ProductAlertsProps) {
   const profitProblem = costChange?.profitDropped ? costChange : null;
   const priceAdjusted = !profitProblem && costChange && costChange.changePct > 0 && costChange.priceChanged ? costChange : null;
+  // The card above already states the cost change once; keep the list to stock and sales problems.
+  const listed = profitProblem || priceAdjusted ? alerts.filter((a) => a.rule !== "profit-drop" && a.rule !== "cost-increase") : alerts;
 
-  if (alerts.length === 0 && !profitProblem && !priceAdjusted) {
+  if (listed.length === 0 && !profitProblem && !priceAdjusted) {
     return <EmptyState title="No alerts for this product" description="Stock, sales and profit all look fine." />;
   }
 
@@ -22,9 +24,9 @@ export function ProductAlerts({ alerts, costChange }: ProductAlertsProps) {
     <div className="flex flex-col gap-5">
       {profitProblem && <ProfitProblem change={profitProblem} />}
       {priceAdjusted && <PriceAdjusted change={priceAdjusted} />}
-      {alerts.length > 0 && (
+      {listed.length > 0 && (
         <ul className="divide-y">
-          {alerts.map((a) => (
+          {listed.map((a) => (
             <li key={a.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
               <AttentionDot level={a.level} className="mt-2 shrink-0" />
               <div className="min-w-0">

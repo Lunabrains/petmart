@@ -28,7 +28,7 @@ export function RunningLowTable({ rows }: { rows: ProductStats[] }) {
       <TableBody>
         {rows.map((s) => (
           <TableRow key={s.product.id}>
-            <TableCell className="max-w-[16rem] pl-5 lg:pl-6">
+            <TableCell className="max-w-[11rem] sm:max-w-[16rem] pl-5 lg:pl-6">
               <ProductLink product={s.product} detail />
             </TableCell>
             <TableCell className={cn("tabular text-right font-semibold", s.status === "running-low" ? "text-critical" : "text-warning-foreground")}>

@@ -6,7 +6,7 @@ import type { ProductStats } from "@/lib/metrics";
 
 /** A product with no sale at all in the history gets the second message; `history` is how far back it goes. */
 function noSalesMessage(lastSaleDaysAgo: number | null, history: number): string {
-  if (lastSaleDaysAgo === null) return `No Sales in the Last ${history} Days`;
+  if (lastSaleDaysAgo === null) return `No Sales for Over ${history} Days`;
   return `No Sales for ${lastSaleDaysAgo} Days`;
 }
 
@@ -25,7 +25,7 @@ export function NoSalesTable({ rows, history }: { rows: ProductStats[]; history:
       <TableBody>
         {rows.map((s) => (
           <TableRow key={s.product.id}>
-            <TableCell className="max-w-[16rem] pl-5 lg:pl-6">
+            <TableCell className="max-w-[11rem] sm:max-w-[16rem] pl-5 lg:pl-6">
               <ProductLink product={s.product} detail />
             </TableCell>
             <TableCell className="tabular text-right font-medium">{formatMoney(s.stockValue)}</TableCell>
